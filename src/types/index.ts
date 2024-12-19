@@ -14,7 +14,7 @@ export type ButtonProps = {
   onClick?: () => void;
 };
 
-export type IconColor = {
+export type IconProps = {
   color?: 'white' | 'black';
 };
 

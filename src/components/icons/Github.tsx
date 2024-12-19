@@ -1,6 +1,6 @@
-import type { IconColor } from '@/types';
+import type { IconProps } from '@/types';
 
-export const Github = ({ color = 'white' }: IconColor) => {
+export const Github = ({ color = 'white' }: IconProps) => {
   return (
     <svg
       role="img"
