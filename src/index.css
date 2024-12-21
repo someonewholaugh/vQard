@@ -14,6 +14,6 @@
     font-style: normal;
   }
   body {
-    @apply font-projekt-blackbird antialiased min-h-svh sm:min-h-screen overflow-hidden bg-black text-white selection:text-black selection:bg-white;
+    @apply font-projekt-blackbird antialiased min-h-svh sm:min-h-screen bg-black text-white selection:text-black selection:bg-white;
   }
 }
