@@ -1,13 +1,18 @@
 import type { ButtonProps } from '@/types';
 import { Button as Btn } from '@headlessui/react';
+import { cn } from '@/utils';
 
-export const Button = ({ children, className, icon, onClick }: ButtonProps) => {
-  const classes = `bg-white rounded-md px-4 py-2 text-black ${className} ${
-    icon ? 'flex items-center justify-center gap-2' : ''
-  }`;
-
+export const Button = ({ children, type = 'button', className, icon, onClick }: ButtonProps) => {
   return (
-    <Btn onClick={onClick} className={classes}>
+    <Btn
+      type={type}
+      onClick={onClick}
+      className={cn(
+        'bg-white rounded-md px-4 py-2 text-black text-sm',
+        icon && 'flex items-center justify-center gap-2',
+        className
+      )}
+    >
       {icon}
       {children}
     </Btn>

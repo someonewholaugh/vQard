@@ -8,6 +8,7 @@ export const Layout = ({
   title = import.meta.env.VITE_APP_TITLE,
   description = import.meta.env.VITE_APP_DESCRIPTION,
   centerContent = false,
+  className,
   children,
 }: LayoutProps) => {
   const { pathname } = useLocation();
@@ -23,11 +24,12 @@ export const Layout = ({
         <meta property="og:url" content={url} />
         <meta property="og:description" content={description} />
       </Helmet>
-      <Header />
+      <Header path={pathname} />
       <main
         className={cn(
-          'container max-w-screen-lg mx-auto px-6',
-          centerContent && 'flex items-center justify-center min-h-screen'
+          'container max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg mx-auto px-6',
+          centerContent && 'flex items-center justify-center h-screen',
+          className
         )}
       >
         {children}
