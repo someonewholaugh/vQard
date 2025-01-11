@@ -1,11 +1,11 @@
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useRef, useState, useEffect } from 'react';
 import { Field, Label, Input } from '@headlessui/react';
 import { Button, Modal } from '@/components/ui';
 import { Avatar, Eye } from '@/components/icons';
 import { cn } from '@/utils';
 import type { AvatarFieldProps } from '@/types';
 
-export const AvatarField = ({ id, name, register, error }: AvatarFieldProps) => {
+export const AvatarField = ({ id, name, register, error, resetAvatar }: AvatarFieldProps) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -13,6 +13,13 @@ export const AvatarField = ({ id, name, register, error }: AvatarFieldProps) => 
   const previewImage = (file?: File) => {
     if (preview) URL.revokeObjectURL(preview);
     setPreview(file ? URL.createObjectURL(file) : null);
+  };
+
+  const resetImage = () => {
+    setPreview(null);
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -25,7 +32,7 @@ export const AvatarField = ({ id, name, register, error }: AvatarFieldProps) => 
 
   const renderErrorText = () => (
     <div className="space-y-0.5 sr-only md:not-sr-only">
-      <p className={cn('text-xs', error && 'text-red-500')} id={`${id}-error`}>
+      <p className={cn('text-xs text-pretty', error && 'text-red-500')} id={`${id}-error`}>
         {error?.message || 'Upload your Avatar'} {!error && <span className="text-red-500">*</span>}
       </p>
       <p className={cn('text-[0.6rem]', error ? 'text-red-500' : 'text-stone-400')}>
@@ -33,6 +40,10 @@ export const AvatarField = ({ id, name, register, error }: AvatarFieldProps) => 
       </p>
     </div>
   );
+
+  useEffect(() => {
+    if (resetAvatar) resetImage();
+  }, [resetAvatar]);
 
   return (
     <>
@@ -83,11 +94,11 @@ export const AvatarField = ({ id, name, register, error }: AvatarFieldProps) => 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="flex items-center justify-center h-full">
           {preview && (
-            <div className="relative w-full h-full group">
+            <div className="relative aspect-square group">
               <img
                 src={preview}
                 alt="Expanded Avatar preview"
-                className="object-cover w-full h-full rounded-xl aspect-square"
+                className="object-cover w-full h-full rounded-xl"
               />
               <Button
                 className="absolute inset-x-0 flex justify-center text-white transition duration-300 rounded-none rounded-b-lg bottom-0 opacity-0 group-hover:opacity-100 hover:bg-black/60 backdrop-blur-lg bg-black/40"

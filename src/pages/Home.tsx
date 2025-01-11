@@ -12,16 +12,13 @@ const Home = () => {
             Create Your Online Virtual Card Effortlessly, No Login Required
           </h1>
           <p className="text-sm tracking-wide text-stone-400 text-pretty">
-            Simplify networking with a personalized vCard. No sign-ups, no barriers
-            – just your information, beautifully organized and ready to share.
+            Simplify networking with a personalized vCard. No sign-ups, no barriers – just your
+            information, beautifully organized and ready to share.
           </p>
         </div>
         <div>
           <Link to="/create">
-            <Button
-              className="w-full mx-auto transition-transform md:w-auto hover:-translate-y-1"
-              icon={<Create color="black" />}
-            >
+            <Button className="w-full mx-auto" icon={<Create color="black" />}>
               Create Now
             </Button>
           </Link>
