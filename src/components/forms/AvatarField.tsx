@@ -92,9 +92,9 @@ export const AvatarField = ({ id, name, register, error, resetAvatar }: AvatarFi
         />
       </Field>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center">
           {preview && (
-            <div className="relative aspect-square group">
+            <div className="relative aspect-square group size-80 md:size-96">
               <img
                 src={preview}
                 alt="Expanded Avatar preview"
@@ -102,6 +102,7 @@ export const AvatarField = ({ id, name, register, error, resetAvatar }: AvatarFi
               />
               <Button
                 className="absolute inset-x-0 flex justify-center text-white transition duration-300 rounded-none rounded-b-lg bottom-0 opacity-0 group-hover:opacity-100 hover:bg-black/60 backdrop-blur-lg bg-black/40"
+                hoverAnimation={false}
                 onClick={() => inputRef.current?.click()}
               >
                 Change Avatar

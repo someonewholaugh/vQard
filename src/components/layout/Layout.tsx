@@ -8,6 +8,7 @@ export const Layout = ({
   title = import.meta.env.VITE_APP_TITLE,
   description = import.meta.env.VITE_APP_DESCRIPTION,
   centerContent = false,
+  withHeader = true,
   className,
   children,
 }: LayoutProps) => {
@@ -24,7 +25,7 @@ export const Layout = ({
         <meta property="og:url" content={url} />
         <meta property="og:description" content={description} />
       </Helmet>
-      <Header path={pathname} />
+      {withHeader && <Header path={pathname} />}
       <main
         className={cn(
           'container max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg mx-auto px-6',
