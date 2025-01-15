@@ -18,7 +18,7 @@ const Home = () => {
         </div>
         <div>
           <Link to="/create">
-            <Button className="w-full mx-auto" icon={<Create color="black" />}>
+            <Button className="w-full md:w-fit mx-auto" icon={<Create color="black" />}>
               Create Now
             </Button>
           </Link>
