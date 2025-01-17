@@ -1,5 +1,14 @@
 export { Avatar } from './Avatar';
+export { Question } from './Question';
 export { Create } from './Create';
+export { Email } from './Email';
 export { Eye } from './Eye';
+export { Facebook } from './Facebook';
 export { Github } from './Github';
+export { Instagram } from './Instagram';
+export { LinkedIn } from './LinkedIn';
+export { Location } from './Location';
 export { Upload } from './Upload';
+export { Phone } from './Phone';
+export { Website } from './Website';
+export { X } from './X';

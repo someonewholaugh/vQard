@@ -69,7 +69,7 @@ const Create = () => {
         register={register}
         error={errors[name]}
         isRequired={isRequired}
-        isTextArea={name === 'note' && category === 'additional'}
+        isTextArea={name === 'about' && category === 'personal'}
       />
     ));
 
@@ -156,16 +156,16 @@ const Create = () => {
             <div className="absolute inset-0 px-4 pt-4 pb-6 space-y-4 overflow-y-auto md:px-6">
               <FormDivider text="Personal Information" />
               <div className="flex space-x-4">{renderFields(formFields.slice(0, 2))}</div>
-              {renderFields(formFields.slice(2, 5))}
+              {renderFields(formFields.slice(2, 6))}
+
+              <FormDivider text="Student Information" />
+              {renderFields(formFields.filter((field) => field.category === 'student'))}
 
               <FormDivider text="Professional Information" />
               {renderFields(formFields.filter((field) => field.category === 'professional'))}
 
               <FormDivider text="Social Media & Links" />
               {renderFields(formFields.filter((field) => field.category === 'social'))}
-
-              <FormDivider text="Additional" />
-              {renderFields(formFields.filter((field) => field.category === 'additional'))}
             </div>
           </ScrollShadow>
           <Button type="submit" className="w-full">
