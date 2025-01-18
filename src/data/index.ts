@@ -40,20 +40,44 @@ export const formFields: FieldConfig[] = [
     placeholder: 'Jl. Venus No. 1, Jakarta, Indonesia',
     category: 'personal',
   },
+  {
+    name: 'about',
+    type: 'text',
+    label: 'About',
+    placeholder: 'Tell something about you',
+    isRequired: true,
+    category: 'personal',
+  },
 
-  // Professional Information
+  // Student Information (for Students)
+  {
+    name: 'university',
+    type: 'text',
+    label: 'University',
+    placeholder: 'University of Indonesia',
+    category: 'student',
+  },
+  {
+    name: 'major',
+    type: 'text',
+    label: 'Major',
+    placeholder: 'Computer Science',
+    category: 'student',
+  },
+
+  // Professional Information (for Workers)
+  {
+    name: 'company',
+    type: 'text',
+    label: 'Company',
+    placeholder: 'PT. Company',
+    category: 'professional',
+  },
   {
     name: 'jobTitle',
     type: 'text',
     label: 'Job Title',
     placeholder: 'Software Engineer',
-    category: 'professional',
-  },
-  {
-    name: 'organization',
-    type: 'text',
-    label: 'Organization',
-    placeholder: 'PT. Company',
     category: 'professional',
   },
   {
@@ -120,14 +144,5 @@ export const formFields: FieldConfig[] = [
     label: 'X / Twitter',
     placeholder: 'https://x.com/username',
     category: 'social',
-  },
-
-  // Additional Information
-  {
-    name: 'note',
-    type: 'text',
-    label: 'Note',
-    placeholder: 'Add your notes here',
-    category: 'additional',
   },
 ];

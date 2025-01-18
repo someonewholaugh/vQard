@@ -24,7 +24,7 @@ export const Modal = ({ isOpen, onClose, children, hideCloseButton }: ModalProps
                 type="button"
                 title="Close"
                 onClick={onClose}
-                className="p-2 transition duration-300 border rounded-full hover:bg-black-secondary/20"
+                className="p-2 transition duration-300 border rounded-full hover:bg-white/20 bg-white/10"
               >
                 <Close />
               </button>

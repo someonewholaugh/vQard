@@ -1,5 +1,7 @@
 export { Avatar } from './Avatar';
 export { Question } from './Question';
+export { Copy } from './Copy';
+export { CopyCheck } from './CopyCheck';
 export { Create } from './Create';
 export { Email } from './Email';
 export { Eye } from './Eye';
@@ -8,7 +10,9 @@ export { Github } from './Github';
 export { Instagram } from './Instagram';
 export { LinkedIn } from './LinkedIn';
 export { Location } from './Location';
+export { Menu } from './Menu';
 export { Upload } from './Upload';
 export { Phone } from './Phone';
+export { Warning } from './Warning';
 export { Website } from './Website';
 export { X } from './X';
