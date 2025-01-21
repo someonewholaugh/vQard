@@ -10,7 +10,7 @@ import { formFields } from '@/data';
 import { type FormData, FormSchema } from '@/types';
 import { addVCard } from '@/firebase';
 import { useImgBB } from '@/hooks';
-import { addToLS, encryptValue } from '@/utils';
+import { addToLS, encryptValue, shortenUrl } from '@/utils';
 
 const Create = () => {
   const {
@@ -37,21 +37,21 @@ const Create = () => {
     setIsModalOpen(true);
     try {
       const uploadedAvatarUrl = await uploadImage(formData.avatar);
-      const vCardId = await addVCard({
-        ...formData,
-        avatarUrl: uploadedAvatarUrl ?? '',
-      });
+      const vCardId = await addVCard({ ...formData, avatarUrl: uploadedAvatarUrl ?? '' });
+      const encodedId = encodeURIComponent(encryptValue(vCardId));
+      const baseUrl = `${import.meta.env.VITE_APP_BASE_URL}/c/${encodedId}`;
+      const shortedUrl = await shortenUrl(baseUrl);
 
-      addToLS('Card ID', vCardId);
-      setVCard({
-        ...formData,
-        avatarUrl: uploadedAvatarUrl ?? '',
-        id: encodeURIComponent(encryptValue(vCardId)),
-      });
+      addToLS('UserCards', { id: vCardId, shortUrl: shortedUrl });
+      setVCard({ ...formData, avatarUrl: uploadedAvatarUrl ?? '', id: encodedId });
+
       reset();
       resetAvatarField();
-    } catch (err) {
-      console.error('Error while submitting the form:', err);
+    } catch (error) {
+      console.error(
+        'Error while submitting the form:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -94,23 +94,29 @@ const Create = () => {
 
     return (
       <div className="flex flex-col items-center space-y-8">
-        <div className="aspect-square border border-white/20 rounded-xl size-52 overflow-hidden relative">
+        <div className="aspect-square rounded-xl size-52 overflow-hidden relative">
           <div
-            className="absolute inset-0 flex items-center justify-center bg-white/10 animate-pulse"
+            className="absolute inset-0 flex items-center justify-center bg-white/10 animate-pulse border border-white/20 "
             aria-hidden="true"
             data-placeholder
           ></div>
           <img
-            src={vCard?.avatarUrl}
+            src={
+              vCard?.avatarUrl ||
+              `https://avatar.iran.liara.run/username?username=${vCard?.firstName}+${vCard?.lastName}`
+            }
             alt={`${vCard?.firstName} ${vCard?.lastName}`}
             draggable="false"
+            loading="eager"
             decoding="async"
             onLoad={(e) => {
               const parent = e.currentTarget.parentElement!;
-              parent.querySelector('.animate-pulse')?.remove();
+              parent.classList.remove('animate-pulse', 'border', 'border-white/20');
               e.currentTarget.style.opacity = '1';
             }}
-            onError={(e) => (e.currentTarget.style.display = 'none')}
+            onError={(e) => {
+              e.currentTarget.src = `https://avatar.iran.liara.run/username?username=${vCard?.firstName}+${vCard?.lastName}`;
+            }}
             className="object-cover w-full h-full opacity-0 transition-opacity duration-300 absolute inset-0"
           />
         </div>
