@@ -1,3 +1,4 @@
+import { Timestamp } from 'firebase/firestore';
 import type { ReactNode } from 'react';
 import type { FieldError, UseFormRegister } from 'react-hook-form';
 import { z } from 'zod';
@@ -22,6 +23,7 @@ export interface ButtonProps {
   className?: string;
   icon?: ReactNode;
   hoverAnimation?: boolean;
+  isDisabled?: boolean;
   onClick?: () => void;
 }
 
@@ -43,9 +45,33 @@ export interface ModalProps {
   hideCloseButton?: boolean;
 }
 
+export interface ActionMenuProps {
+  customModalContent?: ReactNode;
+  customDeleteButton?: ReactNode;
+  customEditButton?: ReactNode;
+  modalTitle?: string;
+  modalMessage?: string;
+  onDelete?: () => void;
+}
+
+export interface AlertCardProps {
+  icon?: ReactNode;
+  title: string;
+  message: string;
+  link?: string;
+  buttonText?: string;
+  children?: ReactNode;
+  onClick?: () => void;
+}
+
 export interface ScrollShadowProps {
   children: ReactNode;
   className?: string;
+}
+
+export interface QrCodeProps {
+  title: string;
+  value: string;
 }
 
 /** Form Schema */
@@ -75,7 +101,7 @@ const avatarSchema = z
   });
 
 export const FormSchema = z.object({
-  // Informasi dasar
+  id: z.string().optional(),
   firstName: z.string().min(1, 'First Name is required'),
   lastName: z.string().optional(),
   email: z.string().email('Invalid email address').min(1, 'Email is required'),
@@ -111,6 +137,7 @@ export const FormSchema = z.object({
   facebook: createUrlSchema('facebook.com'),
   instagram: createUrlSchema('instagram.com'),
   x: createUrlSchema('x.com'),
+  createdAt: z.custom<Timestamp>((val) => val instanceof Timestamp).optional(),
 });
 
 const NoAvatarForm = FormSchema.omit({ avatar: true });
