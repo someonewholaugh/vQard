@@ -52,6 +52,7 @@ export interface ActionMenuProps {
   modalTitle?: string;
   modalMessage?: string;
   onDelete?: () => void;
+  onClick?: () => void;
 }
 
 export interface AlertCardProps {
@@ -94,9 +95,10 @@ const createUrlSchema = (domain?: string) =>
 
 const avatarSchema = z
   .any()
-  .refine((file) => file instanceof File, 'Avatar is required')
-  .refine((file) => file && file.size <= MAX_FILE_SIZE, 'File size must be smaller than 2MB')
-  .refine((file) => file && ACCEPTED_IMAGE_TYPES.includes(file.type), {
+  .optional()
+  .refine((file) => !file || file instanceof File, 'Avatar must be a file')
+  .refine((file) => !file || file.size <= MAX_FILE_SIZE, 'File size must be smaller than 2MB')
+  .refine((file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type), {
     message: 'Invalid format. Allowed types: JPEG, JPG, PNG, WEBP',
   });
 
@@ -130,6 +132,46 @@ export const FormSchema = z.object({
     ),
   companyAddress: z.string().optional(),
   avatar: avatarSchema,
+  avatarUrl: z.string().url().optional(),
+  website: createUrlSchema(),
+  github: createUrlSchema('github.com'),
+  linkedin: createUrlSchema('linkedin.com'),
+  facebook: createUrlSchema('facebook.com'),
+  instagram: createUrlSchema('instagram.com'),
+  x: createUrlSchema('x.com'),
+  createdAt: z.custom<Timestamp>((val) => val instanceof Timestamp).optional(),
+});
+
+export const EditFormSchema = z.object({
+  id: z.string().optional(),
+  firstName: z.string().min(1, 'First Name is required'),
+  lastName: z.string().optional(),
+  email: z.string().email('Invalid email address').min(1, 'Email is required'),
+  phone: z.string().regex(/^[0-9]{10,}$/, 'Phone number must be at least 10 digits and numeric'),
+  address: z.string().optional(),
+  about: z
+    .string()
+    .max(1000, 'About must be less than 1000 characters')
+    .min(1, 'About is required'),
+  university: z.string().optional(),
+  major: z.string().optional(),
+  company: z.string().optional(),
+  jobTitle: z.string().optional(),
+  workEmail: z
+    .string()
+    .optional()
+    .refine((email) => !email || z.string().email().safeParse(email).success, {
+      message: 'Invalid work email address',
+    }),
+  workPhone: z
+    .string()
+    .optional()
+    .refine(
+      (phone) => !phone || (/^[0-9]+$/.test(phone) && phone.length >= 10),
+      'Work phone number must be at least 10 digits and numeric'
+    ),
+  companyAddress: z.string().optional(),
+  avatar: z.any().optional(),
   avatarUrl: z.string().url().optional(),
   website: createUrlSchema(),
   github: createUrlSchema('github.com'),
@@ -177,7 +219,8 @@ export interface AvatarFieldProps {
   name: keyof FormData;
   register: UseFormRegister<FormData>;
   error: FieldError | undefined;
-  resetAvatar: boolean;
+  resetAvatar?: boolean;
+  hasUrl?: string;
 }
 
 // Hooks
