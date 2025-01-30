@@ -1,63 +1,115 @@
-import { useState, SyntheticEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, SyntheticEvent } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useForm, FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Fieldset } from '@headlessui/react';
 import { Layout } from '@/components/layout';
 import { AvatarField, FormDivider, FormLegend, FormField } from '@/components/forms';
 import { Button, ScrollShadow, Spinner, Modal, AlertCard } from '@/components/ui';
-import { Question } from '@/components/icons';
+import { Question, Restricted } from '@/components/icons';
 import { formFields } from '@/data';
 import { type FormData, FormSchema } from '@/types';
-import { addVCard } from '@/firebase';
+import { getVCardById, updateVCardById } from '@/firebase';
 import { useImgBB } from '@/hooks';
-import { addToLS, encryptValue, shortenUrl } from '@/utils';
+import { decryptValue, isCardIdInLS } from '@/utils';
 
-const Create = () => {
+const Edit = () => {
+  const { id } = useParams();
   const {
     register,
     handleSubmit,
-    reset,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   });
+
   const { error, uploadImage } = useImgBB();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [resetAvatar, setResetAvatar] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [vCard, setVCard] = useState<(FormData & { id: string }) | null>(null);
+  const [validUser, setValidUser] = useState<boolean | null>(null);
   const PLACEHOLDER_IMAGE = `https://api.dicebear.com/9.x/thumbs/svg?seed=${vCard?.firstName}+${vCard?.lastName}`;
 
-  const resetAvatarField = () => {
-    setResetAvatar(true);
-    setTimeout(() => setResetAvatar(false), 0);
-  };
+  const decryptId = (id: string | undefined) => (id ? decryptValue(id) : null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchVCard = async () => {
+      try {
+        const decryptedId = decryptId(id);
+        if (!decryptedId) return;
+
+        const data = await getVCardById(decryptedId);
+        if (!data) return;
+
+        Object.entries(data).forEach(([key, value]) => {
+          setValue(key as keyof FormData, value as FormData[keyof FormData]);
+        });
+
+        setVCard({ ...data, id: decryptedId } as FormData & { id: string });
+      } catch (error) {
+        console.error('Error fetching vCard:', error);
+      }
+    };
+
+    fetchVCard();
+  }, [id, setValue]);
+
+  useEffect(() => {
+    const decryptedId = decryptId(id);
+    if (!decryptedId) return;
+
+    const isValidUser = isCardIdInLS('Personal', decryptedId);
+    setValidUser(isValidUser);
+  }, [id]);
 
   const onSubmit = async (formData: FormData) => {
+    if (!id || !validUser) return;
+
     setIsLoading(true);
     setIsModalOpen(true);
 
     try {
-      const uploadedAvatarUrl = formData.avatar && await uploadImage(formData.avatar);
-      const vCardId = await addVCard({ ...formData, avatarUrl: uploadedAvatarUrl ?? '' });
-      const encodedId = encodeURIComponent(encryptValue(vCardId));
-      const shortedUrl = await shortenUrl(`${import.meta.env.VITE_APP_BASE_URL}/c/${encodedId}`);
+      const decryptedId = decryptId(id);
+      if (!decryptedId) return;
 
-      addToLS('Personal', { id: vCardId, shortUrl: shortedUrl });
-      setVCard({ ...formData, avatarUrl: uploadedAvatarUrl ?? '', id: encodedId });
+      const uploadedAvatarUrl = formData.avatar
+        ? await uploadImage(formData.avatar)
+        : vCard?.avatarUrl;
 
-      reset();
-      resetAvatarField();
+      const updatedData = { ...formData, avatarUrl: uploadedAvatarUrl ?? '' };
+
+      await updateVCardById(decryptedId, updatedData);
+      setVCard({ ...updatedData, id: id });
     } catch (error) {
       console.error(
-        'Error while submitting the form:',
+        'Error while updating the vCard:',
         error instanceof Error ? error.message : 'Unknown error'
       );
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (validUser === false) {
+    return (
+      <Layout
+        title="Access Denied"
+        description="You don't have permission to edit this vCard"
+        centerContent
+      >
+        <AlertCard
+          icon={<Restricted />}
+          title="Access Denied"
+          message="It looks like you don’t have permission to edit this vCard."
+          buttonText="Return to Collection"
+          link="/collection"
+        />
+      </Layout>
+    );
+  }
 
   const handleImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const parent = e.currentTarget.parentElement!;
@@ -90,7 +142,7 @@ const Create = () => {
       return (
         <div className="flex flex-col items-center space-y-4">
           <Spinner />
-          <h2 className="text-base">Creating your vCard...</h2>
+          <h2 className="text-base">Updating your vCard...</h2>
         </div>
       );
     }
@@ -100,7 +152,7 @@ const Create = () => {
         <AlertCard
           icon={<Question />}
           title="Something Went Wrong"
-          message="An error occurred while processing your request. Please try again later."
+          message="An error occurred while updating your card. Please try again later."
           buttonText="Close"
           onClick={() => setIsModalOpen(false)}
         />
@@ -110,11 +162,7 @@ const Create = () => {
     return (
       <div className="flex flex-col items-center space-y-8">
         <div className="relative overflow-hidden aspect-square rounded-xl size-52">
-          <div
-            className="absolute inset-0 flex items-center justify-center border bg-white/10 animate-pulse border-white/20 "
-            aria-hidden="true"
-            data-placeholder
-          ></div>
+          <div className="absolute inset-0 flex items-center justify-center border bg-white/10 animate-pulse border-white/20"></div>
           <img
             src={vCard?.avatarUrl || PLACEHOLDER_IMAGE}
             alt={`${vCard?.firstName} ${vCard?.lastName}`}
@@ -128,19 +176,19 @@ const Create = () => {
         </div>
         <div className="space-y-0.5 text-center">
           <h2 className="text-lg font-medium">
-            Great Work, {vCard?.firstName} {vCard?.lastName}!
+            Hey, {vCard?.firstName} {vCard?.lastName}!
           </h2>
-          <p className="text-xs text-stone-400">Your vCard is ready and safely saved.</p>
+          <p className="text-xs text-stone-400">Your vCard has been successfully updated.</p>
         </div>
         <div className="w-full space-y-3 md:space-y-4">
-          <Link to={`/c/${vCard?.id}`}>
-            <Button className="w-full">View Card</Button>
+          <Link to={`/c/${encodeURIComponent(id ?? '')}`}>
+            <Button className="w-full">View Updated Card</Button>
           </Link>
           <Button
             className="w-full text-white transition duration-300 bg-transparent border hover:bg-black-secondary/20"
             onClick={() => setIsModalOpen(false)}
           >
-            Create Another
+            Continue Editing
           </Button>
         </div>
       </div>
@@ -148,20 +196,17 @@ const Create = () => {
   };
 
   return (
-    <Layout title="Create your vCard" description="Create your vCard with ease!" centerContent>
+    <Layout title="Edit your vCard" description="Update your vCard details!" centerContent>
       <form className="w-full max-w-screen-md" onSubmit={handleSubmit(onSubmit)}>
         <Fieldset className="space-y-6">
           <div className="flex justify-between w-full">
-            <FormLegend
-              title="Complete Your vCard Details"
-              description="Fields marked with * are required."
-            />
+            <FormLegend title="Edit Your vCard" description="Modify the fields as needed." />
             <AvatarField
               id="avatar"
               name="avatar"
               register={register}
               error={errors.avatar as FieldError}
-              resetAvatar={resetAvatar}
+              hasUrl={vCard?.avatarUrl}
             />
           </div>
           <ScrollShadow className="max-h-[50vh] h-[50vh] rounded-lg border border-white/20 backdrop-blur shadow-inner shadow-stone-500/20">
@@ -180,8 +225,8 @@ const Create = () => {
               {renderFields(formFields.filter((field) => field.category === 'social'))}
             </div>
           </ScrollShadow>
-          <Button type="submit" className="w-full">
-            Create my vCard
+          <Button type="submit" className="w-full" isDisabled={!validUser}>
+            {!validUser ? "You don't have permission to edit this card" : 'Save Changes'}
           </Button>
         </Fieldset>
       </form>
@@ -192,4 +237,4 @@ const Create = () => {
   );
 };
 
-export default Create;
+export default Edit;

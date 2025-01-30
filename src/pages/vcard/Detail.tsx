@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, SyntheticEvent } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Layout } from '@/components/layout';
 import { ActionMenu, AlertCard, Button, Modal, Spinner, Tooltip, QrCode } from '@/components/ui';
@@ -13,34 +13,34 @@ import {
   Website,
   Question,
   X,
+  ArrowLeft,
 } from '@/components/icons';
 import { deleteVCardById, getVCardById } from '@/firebase';
-import { addToLS, decryptValue, deleteFromLS, findCardById, isCardIdInLS } from '@/utils';
-import type { NoAvatarForm } from '@/types';
+import { addToLS, cn, decryptValue, deleteFromLS, findCardById, isCardIdInLS } from '@/utils';
+import type { FormData } from '@/types';
 
 const Detail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [vCard, setVCard] = useState<NoAvatarForm | null>(null);
+  const [vCard, setVCard] = useState<FormData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [hasOwnership, setHasOwnership] = useState<boolean>(false);
   const [shortUrl, setShortUrl] = useState<string | null>(null);
 
+  const decryptId = (id: string | undefined) => (id ? decryptValue(id) : null);
+
   useEffect(() => {
-    const fetchVCard = async (id: string) => {
+    const fetchVCard = async (decryptedId: string) => {
       try {
         setIsLoading(true);
-        const decryptedId = decryptValue(id);
-        if (!decryptedId) throw new Error('Invalid or missing ID');
-
-        setHasOwnership(isCardIdInLS('UserCards', decryptedId));
-        const localData = findCardById('UserCards', decryptedId);
+        setHasOwnership(isCardIdInLS('Personal', decryptedId));
+        const localData = findCardById('Personal', decryptedId);
         if (localData?.shortUrl) setShortUrl(localData.shortUrl);
 
         const data = await getVCardById(decryptedId);
-        setVCard(data as NoAvatarForm);
+        setVCard(data as FormData);
         setIsFavorite(isCardIdInLS('Favorites', decryptedId));
       } catch (error) {
         console.error(
@@ -52,31 +52,25 @@ const Detail = () => {
       }
     };
 
-    if (id) fetchVCard(id);
+    const decryptedId = decryptId(id);
+    if (decryptedId) fetchVCard(decryptedId);
   }, [id]);
 
   const updateFavorite = (action: 'add' | 'remove') => {
-    if (id) {
-      const decryptedId = decryptValue(id);
-      if (decryptedId) {
-        if (action === 'add') {
-          addToLS('Favorites', decryptedId);
-          setIsFavorite(true);
-        } else {
-          deleteFromLS('Favorites', decryptedId);
-          setIsFavorite(false);
-        }
-      }
-    }
+    const decryptedId = decryptId(id);
+    if (!decryptedId) return;
+
+    const isAdding = action === 'add';
+    isAdding ? addToLS('Favorites', decryptedId) : deleteFromLS('Favorites', decryptedId);
+    setIsFavorite(isAdding);
   };
 
   const handleDelete = async () => {
-    try {
-      if (!id) return;
-      const decryptedId = decryptValue(id);
-      if (!decryptedId) throw new Error('Invalid or missing ID');
+    const decryptedId = decryptId(id);
+    if (!decryptedId) return;
 
-      deleteFromLS('UserCards', decryptedId);
+    try {
+      deleteFromLS('Personal', decryptedId);
       await deleteVCardById(decryptedId);
       navigate('/collection', { state: { deleted: true } });
     } catch (error) {
@@ -85,6 +79,16 @@ const Detail = () => {
         error instanceof Error ? error.message : 'Unknown error'
       );
     }
+  };
+
+  const handleImageLoad = (e: SyntheticEvent<HTMLImageElement>) => {
+    const parent = e.currentTarget.parentElement!;
+    parent.classList.remove('animate-pulse', 'border', 'border-white/20');
+    e.currentTarget.style.opacity = '1';
+  };
+
+  const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = PLACEHOLDER_IMAGE;
   };
 
   if (isLoading) {
@@ -112,7 +116,7 @@ const Detail = () => {
   const renderLink = (tooltip: string, url: string, Icon: React.ElementType) => (
     <Tooltip
       text={tooltip}
-      className="hover:bg-white/20 transition-colors duration-300 p-2 bg-white/10 rounded-full"
+      className="p-2 transition-colors duration-300 rounded-full hover:bg-white/20 bg-white/10"
       moreSpacing
     >
       <Link to={url} target="_blank" rel="noopener noreferrer">
@@ -144,7 +148,7 @@ const Detail = () => {
     x,
   } = vCard;
 
-  const PLACEHOLDER_IMAGE = `https://avatar.iran.liara.run/username?username=${firstName}+${lastName}`;
+  const PLACEHOLDER_IMAGE = `https://api.dicebear.com/9.x/thumbs/svg?seed=${firstName}+${lastName}`;
   const hasSocialMedia = [website, github, linkedin, facebook, instagram, x].some(Boolean);
   const hasEducation = [university, major].some(Boolean);
   const hasWork = [company, jobTitle, workEmail, workPhone, companyAddress].some(Boolean);
@@ -156,10 +160,10 @@ const Detail = () => {
       withHeader={false}
       className="p-6"
     >
-      <div className="max-w-screen-sm mx-auto">
+      <div className="relative max-w-screen-sm mx-auto">
         <div className="space-y-6">
           <div
-            className="relative flex justify-center w-full h-full max-h-40 bg-cover bg-center rounded-xl border border-white/20 animate-pulse"
+            className="relative flex justify-center w-full h-full bg-center bg-cover border max-h-40 rounded-xl border-white/20 animate-pulse"
             style={{ backgroundImage: `url(${avatarUrl || PLACEHOLDER_IMAGE})` }}
             onError={(e) => (e.currentTarget.style.backgroundImage = `url(${PLACEHOLDER_IMAGE})`)}
           >
@@ -168,20 +172,17 @@ const Detail = () => {
               alt={`${firstName} ${lastName}`}
               draggable="false"
               loading="eager"
-              onLoad={(e) => {
-                const parent = e.currentTarget.parentElement!;
-                parent.classList.remove('animate-pulse', 'border', 'border-white/20');
-                e.currentTarget.style.opacity = '1';
-              }}
-              onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
-              className="object-cover size-32 md:size-40 z-10 opacity-0 transition-opacity duration-300"
+              decoding="async"
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              className="z-10 object-cover transition-opacity duration-300 opacity-0 size-32 md:size-40"
             />
             <div className="absolute inset-0 h-full rounded-xl backdrop-blur-lg bg-black/20"></div>
           </div>
-          <div className="p-6 bg-black-secondary/20 backdrop-blur-md border border-white/20 rounded-xl">
+          <div className="p-6 border bg-black-secondary/20 backdrop-blur-md border-white/20 rounded-xl">
             <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <h1 className="text-xl md:text-2xl line-clamp-2 w-3/5">
+                <h1 className="w-3/5 text-xl md:text-2xl line-clamp-2">
                   {firstName} {lastName}
                 </h1>
                 <div className="flex items-center space-x-2">
@@ -197,14 +198,14 @@ const Detail = () => {
                   {renderLink('Phone', `tel:${phone}`, Phone)}
                 </div>
               </div>
-              <p className="text-xs md:text-sm text-stone-400 leading-relaxed text-justify">
+              <p className="text-xs leading-relaxed text-justify md:text-sm text-stone-400">
                 {about}
               </p>
 
               {hasEducation && (
                 <>
                   <hr className="border-white/20" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     {university && (
                       <div className="space-y-1.5">
                         <h1 className="text-xs uppercase tracking-[0.3em] text-stone-500">
@@ -226,7 +227,7 @@ const Detail = () => {
               {hasWork && (
                 <>
                   <hr className="border-white/20" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     {company && (
                       <div className="space-y-1.5">
                         <h1 className="text-xs uppercase tracking-[0.3em] text-stone-500">
@@ -250,7 +251,7 @@ const Detail = () => {
                         </h1>
                         <Link
                           to={`mailto:${workEmail}`}
-                          className="text-sm text-white hover:opacity-70 transition-opacity duration-300"
+                          className="text-sm text-white transition-opacity duration-300 hover:opacity-70"
                         >
                           {workEmail}
                         </Link>
@@ -263,7 +264,7 @@ const Detail = () => {
                         </h1>
                         <Link
                           to={`tel:${workPhone}`}
-                          className="text-sm text-white hover:opacity-70 transition-opacity duration-300"
+                          className="text-sm text-white transition-opacity duration-300 hover:opacity-70"
                         >
                           {workPhone}
                         </Link>
@@ -284,7 +285,7 @@ const Detail = () => {
               {hasSocialMedia && (
                 <>
                   <hr className="border-white/20" />
-                  <div className="flex justify-center items-center space-x-2">
+                  <div className="flex items-center justify-center space-x-2">
                     {website && renderLink('Personal Website', website, Website)}
                     {github && renderLink('GitHub', github, Github)}
                     {linkedin && renderLink('LinkedIn', linkedin, LinkedIn)}
@@ -296,25 +297,34 @@ const Detail = () => {
               )}
             </div>
           </div>
-          {hasOwnership ? (
-            <div className="flex items-center space-x-2.5">
-              <Button className="w-full" onClick={() => setIsModalOpen(true)}>
-                Share vCard
-              </Button>
-              <ActionMenu onDelete={handleDelete} />
-            </div>
-          ) : isFavorite ? (
+          <div className="flex items-center space-x-2.5">
             <Button
-              className="w-full bg-transparent border border-red-500 text-red-500 hover:bg-white/5"
-              onClick={() => updateFavorite('remove')}
-            >
-              Remove from Favorites
-            </Button>
-          ) : (
-            <Button className="w-full" onClick={() => updateFavorite('add')}>
-              Add to Favorites
-            </Button>
-          )}
+              className="flex-none border border-white/20 bg-white/10 backdrop-blur-lg hover:bg-white/20"
+              icon={<ArrowLeft />}
+              onClick={() => navigate(-1)}
+            />
+            {hasOwnership ? (
+              <>
+                <Button className="grow" onClick={() => setIsModalOpen(true)}>
+                  Share vCard
+                </Button>
+                <ActionMenu
+                  onClick={() => navigate(`/c/${encodeURIComponent(id ?? '')}/edit`)}
+                  onDelete={handleDelete}
+                />
+              </>
+            ) : (
+              <Button
+                className={cn(
+                  'w-full',
+                  isFavorite && 'text-red-500 bg-transparent border border-red-500 hover:bg-white/5'
+                )}
+                onClick={() => updateFavorite(isFavorite ? 'remove' : 'add')}
+              >
+                {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
