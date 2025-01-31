@@ -39,7 +39,9 @@ const Create = () => {
     setIsModalOpen(true);
 
     try {
-      const uploadedAvatarUrl = formData.avatar && await uploadImage(formData.avatar);
+      const uploadedAvatarUrl = formData.avatar
+        ? await uploadImage(formData.avatar)
+        : PLACEHOLDER_IMAGE;
       const vCardId = await addVCard({ ...formData, avatarUrl: uploadedAvatarUrl ?? '' });
       const encodedId = encodeURIComponent(encryptValue(vCardId));
       const shortedUrl = await shortenUrl(`${import.meta.env.VITE_APP_BASE_URL}/c/${encodedId}`);

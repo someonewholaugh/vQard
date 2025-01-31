@@ -317,7 +317,8 @@ const Detail = () => {
               <Button
                 className={cn(
                   'w-full',
-                  isFavorite && 'text-red-500 bg-transparent border border-red-500 hover:bg-white/5'
+                  isFavorite &&
+                    'text-red-500 border border-red-500 hover:bg-white/10 bg-white/5 backdrop-blur-lg'
                 )}
                 onClick={() => updateFavorite(isFavorite ? 'remove' : 'add')}
               >

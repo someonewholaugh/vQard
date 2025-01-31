@@ -16,10 +16,16 @@ const Home = () => {
             information, beautifully organized and ready to share.
           </p>
         </div>
-        <div>
+        <div className='flex flex-col md:flex-row md:space-x-2.5 md:justify-center'>
           <Link to="/create">
-            <Button className="w-full md:w-fit mx-auto" icon={<Create color="black" />}>
+            <Button className="w-full" icon={<Create color="black" />}>
               Create Now
+            </Button>
+          </Link>
+          <div className="h-4"></div>
+          <Link to="/discover">
+            <Button className="w-full transition border hover:bg-white/20 bg-white/10 border-white/20 text-inherit backdrop-blur-lg">
+              or Discover Profiles
             </Button>
           </Link>
         </div>
