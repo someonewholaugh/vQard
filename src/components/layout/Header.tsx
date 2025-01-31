@@ -1,12 +1,30 @@
 import type { HeaderProps } from '@/types';
 import { Link } from 'react-router-dom';
 import { Tooltip } from '@/components/ui';
-import { Github, Create } from '@/components/icons';
+import { Github, Create, Collection, Discover } from '@/components/icons';
 import { cn } from '@/utils';
 
 const navItems = [
-  { icon: <Github />, href: 'https://github.com/zangetsuuuu/vQard', tooltip: 'View on GitHub' },
-  { icon: <Create />, href: '/create', tooltip: 'Create a new card' },
+  {
+    icon: <Github />,
+    href: 'https://github.com/zangetsuuuu/vQard',
+    tooltip: 'View on GitHub',
+  },
+  {
+    icon: <Create />,
+    href: '/create',
+    tooltip: 'Create a new card',
+  },
+  {
+    icon: <Collection />,
+    href: '/collection',
+    tooltip: 'View your collection',
+  },
+  {
+    icon: <Discover />,
+    href: '/discover',
+    tooltip: 'Discover profiles',
+  },
 ];
 
 export const Header = ({ path }: HeaderProps) => {

@@ -24,6 +24,7 @@ export const Layout = ({
         <meta property="og:type" content="website" />
         <meta property="og:url" content={url} />
         <meta property="og:description" content={description} />
+        <title>{title} - vQard</title>
       </Helmet>
       {withHeader && <Header path={pathname} />}
       <main

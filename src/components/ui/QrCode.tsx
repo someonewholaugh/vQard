@@ -38,6 +38,14 @@ export const QrCode = ({ value }: QrCodeProps) => {
     downloadLink.click();
   }, []);
 
+  if (!value) {
+    return (
+      <div className="bg-black-secondary/20 backdrop-blur-lg rounded-xl h-fit py-4 grid place-items-center border border-white/20">
+        <p className="text-center text-red-500">Unable to generate QR Code.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-black-secondary/20 backdrop-blur-lg rounded-xl h-fit p-10 space-y-6 grid place-items-center border border-white/20">
       <div className="overflow-hidden rounded-lg">
