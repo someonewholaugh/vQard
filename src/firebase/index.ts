@@ -1,2 +1,9 @@
 export { db } from './config';
-export { addVCard, getVCard } from './services';
+export {
+  addVCard,
+  deleteVCardById,
+  getAllVCards,
+  getStoredVCards,
+  getVCardById,
+  updateVCardById,
+} from './services';

@@ -1,11 +1,17 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Home from '@/pages/Home';
+import Collection from '@/pages/Collection';
+import Discover from '@/pages/Discover';
+import NotFound from '@/pages/NotFound';
 import Create from '@/pages/vcard/Create';
 import Edit from '@/pages/vcard/Edit';
 import Detail from '@/pages/vcard/Detail';
-import Collection from '@/pages/vcard/Collection';
 
 const routes = [
+  {
+    path: '*',
+    element: <NotFound />,
+  },
   {
     path: '/',
     element: <Home />,
@@ -15,6 +21,14 @@ const routes = [
     element: <Create />,
   },
   {
+    path: '/collection',
+    element: <Collection />
+  },
+  {
+    path: '/discover',
+    element: <Discover />
+  },
+  {
     path: '/c/:id/edit',
     element: <Edit />,
   },
@@ -22,10 +36,6 @@ const routes = [
     path: '/c/:id',
     element: <Detail />,
   },
-  {
-    path: '/collection',
-    element: <Collection />
-  }
 ];
 
 export const router = createBrowserRouter(routes);
