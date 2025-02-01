@@ -9,10 +9,6 @@ import Detail from '@/pages/vcard/Detail';
 
 const routes = [
   {
-    path: '*',
-    element: <NotFound />,
-  },
-  {
     path: '/',
     element: <Home />,
   },
@@ -22,11 +18,11 @@ const routes = [
   },
   {
     path: '/collection',
-    element: <Collection />
+    element: <Collection />,
   },
   {
     path: '/discover',
-    element: <Discover />
+    element: <Discover />,
   },
   {
     path: '/c/:id/edit',
@@ -35,6 +31,10 @@ const routes = [
   {
     path: '/c/:id',
     element: <Detail />,
+  },
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ];
 

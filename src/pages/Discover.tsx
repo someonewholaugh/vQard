@@ -6,7 +6,7 @@ import { Community } from '@/components/icons';
 import { getAllVCards } from '@/firebase';
 import { FormData } from '@/types';
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 8;
 
 const Discover = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -73,7 +73,7 @@ const Discover = () => {
           Explore digital cards, save your favorites, and connect with others.
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
         {displayedCards.map((card) => (
           <UserCards key={card.id} {...card} isDiscover />
         ))}

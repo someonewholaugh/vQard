@@ -67,7 +67,7 @@ export const UserCards = ({
   };
 
   return (
-    <div className="relative overflow-hidden border rounded-lg border-white/20 aspect-square animate-pulse group bg-white/10 backdrop-blur-lg">
+    <div className="relative overflow-hidden border rounded-lg border-white/20 h-64 md:h-72 max-h-64 md:max-h-72 animate-pulse group bg-white/10 backdrop-blur-lg">
       <img
         src={avatarUrl || PLACEHOLDER_IMAGE}
         alt={`${firstName} ${lastName}`}
@@ -79,23 +79,27 @@ export const UserCards = ({
         className="object-cover object-center w-full h-full"
       />
 
-      <div className="absolute inset-0 p-4 transition-opacity duration-300 opacity-0 bg-black/60 backdrop-blur-lg group-hover:opacity-100">
+      <div className="absolute inset-0 p-3 md:p-4 transition-opacity duration-300 opacity-0 bg-black/60 backdrop-blur-lg group-hover:opacity-100">
         <div className="flex flex-col justify-between h-full">
-          <div className="space-y-2.5">
+          <div className="space-y-1.5 md:space-y-2.5">
             <div className="flex items-center justify-between">
-              <h1 className="w-3/5 text-base truncate">{`${firstName} ${lastName}`}</h1>
+              <h1 className="w-full md:w-3/5 text-sm md:text-base truncate">{`${firstName} ${lastName}`}</h1>
               {createdAt && (
-                <time className="text-xs text-stone-400">{formatDate(createdAt.toDate())}</time>
+                <time className="text-xs hidden md:inline-flex text-stone-400">
+                  {formatDate(createdAt.toDate())}
+                </time>
               )}
             </div>
-            <p className="text-xs leading-relaxed line-clamp-5 text-stone-400">
+            <p className="text-[0.625rem] md:text-xs leading-relaxed line-clamp-3 md:line-clamp-5 text-stone-400">
               {about || 'No additional details provided.'}
             </p>
           </div>
 
           <div className="flex items-center space-x-2.5">
             <Link to={cardUrl} className="w-full">
-              <Button className="w-full">View Card</Button>
+              <Button className="w-full">
+                View <span className="hidden md:inline-flex">Card</span>
+              </Button>
             </Link>
             {(isDiscover && !hasOwnership) || listType === 'Favorites' ? (
               <button

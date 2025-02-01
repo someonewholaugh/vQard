@@ -155,10 +155,11 @@ const Detail = () => {
 
   return (
     <Layout
-      title={`vCard - ${firstName} ${lastName}`}
+      title={`${firstName} ${lastName}`}
       description={about}
       withHeader={false}
       className="p-6"
+      ogImage={avatarUrl}
     >
       <div className="relative max-w-screen-sm mx-auto">
         <div className="space-y-6">

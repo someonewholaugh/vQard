@@ -10,6 +10,7 @@ export interface LayoutProps {
   centerContent?: boolean;
   withHeader?: boolean;
   className?: string;
+  ogImage?: string;
   children: ReactNode;
 }
 

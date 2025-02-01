@@ -34,13 +34,13 @@ export const ActionMenu = ({
         <PopoverPanel
           transition
           anchor="top end"
-          className="rounded-xl bg-black/60 border border-white/20 backdrop-blur-md text-sm transition duration-300 ease-in-out [--anchor-gap:var(--spacing-5)] data-[closed]:-translate-y-2 data-[closed]:opacity-0 w-40"
+          className="rounded-xl bg-black/60 border border-white/20 backdrop-blur-md text-sm transition duration-300 ease-in-out [--anchor-gap:var(--spacing-5)] data-[closed]:-translate-y-2 data-[closed]:opacity-0 w-32 md:w-40"
         >
           <div className="p-2" onClick={handleActionClick}>
             {customEditButton || (
               <button
                 type="button"
-                className="w-full px-3 py-2 text-left transition duration-300 rounded-lg hover:bg-white/5"
+                className="w-full px-3 py-2 text-left text-xs md:text-sm transition duration-300 rounded-lg hover:bg-white/5"
                 data-action="edit"
               >
                 Edit
@@ -49,7 +49,7 @@ export const ActionMenu = ({
             {customDeleteButton || (
               <button
                 type="button"
-                className="w-full px-3 py-2 text-left text-red-500 transition duration-300 rounded-lg hover:bg-red-500/20"
+                className="w-full px-3 py-2 text-left text-xs md:text-sm text-red-500 transition duration-300 rounded-lg hover:bg-red-500/20"
                 data-action="delete"
               >
                 Delete

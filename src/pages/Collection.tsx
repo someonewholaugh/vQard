@@ -7,7 +7,7 @@ import { getStoredVCards } from '@/firebase';
 import { getFromLS } from '@/utils';
 import { FormData } from '@/types';
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 8;
 
 const Collection = () => {
   const navigate = useNavigate();
@@ -119,7 +119,7 @@ const Collection = () => {
 
     return (
       <div className='space-y-8'>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
           {paginatedList.map((card) => (
             <UserCards
               key={card.id}
