@@ -16,7 +16,7 @@ import {
   ArrowLeft,
 } from '@/components/icons';
 import { deleteVCardById, getVCardById } from '@/firebase';
-import { addToLS, cn, decryptValue, deleteFromLS, findCardById, isCardIdInLS } from '@/utils';
+import { saveToDB, cn, decryptValue, deleteFromDB, findId, isIdInDB } from '@/utils';
 import type { FormData } from '@/types';
 
 const Detail = () => {
@@ -33,15 +33,22 @@ const Detail = () => {
 
   useEffect(() => {
     const fetchVCard = async (decryptedId: string) => {
+      if (!decryptedId) return;
+
       try {
         setIsLoading(true);
-        setHasOwnership(isCardIdInLS('Personal', decryptedId));
-        const localData = findCardById('Personal', decryptedId);
+
+        const ownershipStatus = await isIdInDB('Personal', decryptedId);
+        setHasOwnership(ownershipStatus);
+
+        const localData = await findId('Personal', decryptedId);
         if (localData?.shortUrl) setShortUrl(localData.shortUrl);
 
         const data = await getVCardById(decryptedId);
-        setVCard(data as FormData);
-        setIsFavorite(isCardIdInLS('Favorites', decryptedId));
+        if (data) setVCard(data as FormData);
+
+        const favoriteStatus = await isIdInDB('Favorites', decryptedId);
+        setIsFavorite(favoriteStatus);
       } catch (error) {
         console.error(
           'Error fetching vCard:',
@@ -56,13 +63,24 @@ const Detail = () => {
     if (decryptedId) fetchVCard(decryptedId);
   }, [id]);
 
-  const updateFavorite = (action: 'add' | 'remove') => {
+  const updateFavorite = async (action: 'add' | 'remove') => {
     const decryptedId = decryptId(id);
     if (!decryptedId) return;
 
-    const isAdding = action === 'add';
-    isAdding ? addToLS('Favorites', decryptedId) : deleteFromLS('Favorites', decryptedId);
-    setIsFavorite(isAdding);
+    try {
+      const isAdding = action === 'add';
+      if (isAdding) {
+        await saveToDB('Favorites', { id: decryptedId });
+      } else {
+        await deleteFromDB('Favorites', decryptedId);
+      }
+      setIsFavorite(isAdding);
+    } catch (error) {
+      console.error(
+        'Error updating favorite status:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+    }
   };
 
   const handleDelete = async () => {
@@ -70,7 +88,7 @@ const Detail = () => {
     if (!decryptedId) return;
 
     try {
-      deleteFromLS('Personal', decryptedId);
+      await deleteFromDB('Personal', decryptedId);
       await deleteVCardById(decryptedId);
       navigate('/collection', { state: { deleted: true } });
     } catch (error) {

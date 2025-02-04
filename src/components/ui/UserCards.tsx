@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ActionMenu, Button } from '@/components/ui';
 import { Favorite, FavoriteOutline } from '@/components/icons';
 import { deleteVCardById } from '@/firebase';
-import { addToLS, deleteFromLS, encryptValue, formatDate, isCardIdInLS } from '@/utils';
+import { saveToDB, deleteFromDB, encryptValue, formatDate, isIdInDB } from '@/utils';
 import { UserCardsProps } from '@/types';
 
 export const UserCards = ({
@@ -25,8 +25,11 @@ export const UserCards = ({
   const PLACEHOLDER_IMAGE = `https://api.dicebear.com/9.x/thumbs/svg?seed=${firstName}+${lastName}`;
 
   useEffect(() => {
-    setHasOwnership(isCardIdInLS('Personal', id));
-    setIsFavorite(isCardIdInLS('Favorites', id));
+    const checkOwnershipAndFavorite = async () => {
+      setHasOwnership(await isIdInDB('Personal', id));
+      setIsFavorite(await isIdInDB('Favorites', id));
+    };
+    checkOwnershipAndFavorite();
   }, [id]);
 
   const { cardUrl, edit } = useMemo(() => {
@@ -37,15 +40,26 @@ export const UserCards = ({
     };
   }, [id]);
 
-  const updateFavorite = (action: 'add' | 'remove') => {
-    const isAdding = action === 'add';
-    isAdding ? addToLS('Favorites', id) : deleteFromLS('Favorites', id);
-    setIsFavorite(isAdding);
+  const updateFavorite = async (action: 'add' | 'remove') => {
+    try {
+      const isAdding = action === 'add';
+      if (isAdding) {
+        await saveToDB('Favorites', { id: id });
+      } else {
+        await deleteFromDB('Favorites', id);
+      }
+      setIsFavorite(isAdding);
+    } catch (error) {
+      console.error(
+        'Error updating favorite status:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+    }
   };
 
   const handleDelete = async () => {
     try {
-      deleteFromLS('Personal', id);
+      deleteFromDB('Personal', id);
       await deleteVCardById(id);
       onDelete?.(id);
       navigate('/collection', { state: { deleted: true } });

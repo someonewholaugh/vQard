@@ -11,7 +11,7 @@ import { formFields } from '@/data';
 import { type FormData, FormSchema } from '@/types';
 import { getVCardById, updateVCardById } from '@/firebase';
 import { useImgBB } from '@/hooks';
-import { decryptValue, isCardIdInLS } from '@/utils';
+import { decryptValue, isIdInDB } from '@/utils';
 
 const Edit = () => {
   const { id } = useParams();
@@ -58,11 +58,15 @@ const Edit = () => {
   }, [id, setValue]);
 
   useEffect(() => {
-    const decryptedId = decryptId(id);
-    if (!decryptedId) return;
+    const checkValidUser = async () => {
+      const decryptedId = decryptId(id);
+      if (!decryptedId) return;
 
-    const isValidUser = isCardIdInLS('Personal', decryptedId);
-    setValidUser(isValidUser);
+      const isValidUser = await isIdInDB('Personal', decryptedId);
+      setValidUser(isValidUser);
+    };
+
+    checkValidUser();
   }, [id]);
 
   const onSubmit = async (formData: FormData) => {
@@ -196,7 +200,7 @@ const Edit = () => {
   };
 
   return (
-    <Layout title="Edit your vCard" description="Update your vCard details!" centerContent>
+    <Layout title="Edit" description="Update your vCard details!" centerContent>
       <form className="w-full max-w-screen-md" onSubmit={handleSubmit(onSubmit)}>
         <Fieldset className="space-y-6">
           <div className="flex justify-between w-full">

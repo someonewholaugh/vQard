@@ -1,12 +1,12 @@
 # vQard
 
-vQard is an easy-to-use web app for creating, editing, and sharing digital cards without the need for login. It stores data in localStorage and Firestore, and lets users favorite cards from others. Images are hosted using ImgBB, making it simple to upload and display pictures.
+vQard is an easy-to-use web app for creating, editing, and sharing digital cards without the need for login. It stores data in IndexedDB and Firestore, and lets users favorite cards from others. Images are hosted using ImgBB, making it simple to upload and display pictures.
 
 ## Features
 
 - **CRUD**: Easily create, read, update, and delete digital cards.
 - **Share Cards**: Share digital cards without requiring authentication.
-- **Store Data**: Store user data using **localStorage** and **Firestore**.
+- **Store Data**: Store user data using **IndexedDB** and **Firestore**.
 - **Favorites**: Mark digital cards from other users as favorites.
 - **Image Hosting**: Upload and host images via **ImgBB**.
 - **QR Code**: Generate scannable QR codes for easy sharing.

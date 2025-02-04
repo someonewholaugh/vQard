@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout';
 import { AlertCard, Button, Pagination, UserCards, Spinner, Tabs, Toast } from '@/components/ui';
 import { Empty, Question } from '@/components/icons';
 import { getStoredVCards } from '@/firebase';
-import { getFromLS } from '@/utils';
+import { getAllFromDB } from '@/utils';
 import { FormData } from '@/types';
 
 const ITEMS_PER_PAGE = 8;
@@ -27,8 +27,8 @@ const Collection = () => {
   }, [state, navigate]);
 
   useEffect(() => {
-    const fetchFromLS = async (storageKey: string) => {
-      const data = getFromLS(storageKey);
+    const fetchFromDB = async (storeName: string) => {
+      const data = await getAllFromDB(storeName);
       return data?.length ? await getStoredVCards(data) : [];
     };
 
@@ -36,8 +36,8 @@ const Collection = () => {
       setIsLoading(true);
       try {
         const [personalResults, favResults] = await Promise.all([
-          fetchFromLS('Personal'),
-          fetchFromLS('Favorites'),
+          fetchFromDB('Personal'),
+          fetchFromDB('Favorites'),
         ]);
         setPersonalCards(personalResults);
         setFavoriteCards(favResults);
@@ -118,7 +118,7 @@ const Collection = () => {
     const paginatedList = getPaginatedData(list);
 
     return (
-      <div className='space-y-8'>
+      <div className="space-y-8">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
           {paginatedList.map((card) => (
             <UserCards

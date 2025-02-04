@@ -11,7 +11,7 @@ import { formFields } from '@/data';
 import { type FormData, FormSchema } from '@/types';
 import { addVCard } from '@/firebase';
 import { useImgBB } from '@/hooks';
-import { addToLS, encryptValue, shortenUrl } from '@/utils';
+import { saveToDB, encryptValue, shortenUrl, generateRandomString } from '@/utils';
 
 const Create = () => {
   const {
@@ -27,7 +27,8 @@ const Create = () => {
   const [resetAvatar, setResetAvatar] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [vCard, setVCard] = useState<(FormData & { id: string }) | null>(null);
-  const PLACEHOLDER_IMAGE = `https://api.dicebear.com/9.x/thumbs/svg?seed=${vCard?.firstName}+${vCard?.lastName}`;
+  const randomString = generateRandomString(6);
+  const PLACEHOLDER_IMAGE = `https://api.dicebear.com/9.x/thumbs/svg?seed=${randomString}`;
 
   const resetAvatarField = () => {
     setResetAvatar(true);
@@ -46,7 +47,7 @@ const Create = () => {
       const encodedId = encodeURIComponent(encryptValue(vCardId));
       const shortedUrl = await shortenUrl(`${import.meta.env.VITE_APP_BASE_URL}/c/${encodedId}`);
 
-      addToLS('Personal', { id: vCardId, shortUrl: shortedUrl });
+      saveToDB('Personal', { id: vCardId, shortUrl: shortedUrl });
       setVCard({ ...formData, avatarUrl: uploadedAvatarUrl ?? '', id: encodedId });
 
       reset();
