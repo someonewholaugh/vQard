@@ -7,7 +7,7 @@ import { cn } from '@/utils';
 const navItems = [
   {
     icon: <Github />,
-    href: 'https://github.com/zangetsuuuu/vQard',
+    href: 'https://github.com/someonewholaugh/vQard',
     tooltip: 'View on GitHub',
   },
   {
